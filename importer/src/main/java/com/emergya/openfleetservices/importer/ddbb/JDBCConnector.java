@@ -48,7 +48,7 @@ public class JDBCConnector {
 
 	@Autowired
 	final public void setDataSource(final DataSource dataSource) {
-	    this.simpleJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+		this.simpleJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 	}
 
 	/**
@@ -59,8 +59,10 @@ public class JDBCConnector {
 	 * @param dsd
 	 * @return the table name
 	 */
-	public String createTable(DataSetDescriptor dsd){
-		//TODO
+	public String createTable(DataSetDescriptor dsd) {
+		// TODO
+		// this.jdbcTemplate.execute("create table mytable
+		// (id integer, name varchar(100))");
 		return null;
 	}
 
@@ -70,8 +72,8 @@ public class JDBCConnector {
 	 * @param dsd
 	 * @param it
 	 */
-	public void addData(DataSetDescriptor dsd, Object[] it){
-		//TODO
+	public void addData(DataSetDescriptor dsd, Object[] it) {
+		// TODO
 	}
 
 	/**
@@ -81,8 +83,8 @@ public class JDBCConnector {
 	 * @param dsd
 	 * @param it
 	 */
-	public void addAllData(DataSetDescriptor dsd, Iterator<Object[]> it){
-		while(it.hasNext()){
+	public void addAllData(DataSetDescriptor dsd, Iterator<Object[]> it) {
+		while (it.hasNext()) {
 			this.addData(dsd, it.next());
 		}
 	}
@@ -94,8 +96,8 @@ public class JDBCConnector {
 	 * @param dsd
 	 * @return
 	 */
-	public Boolean geocode(DataSetDescriptor dsd){
-		//TODO
+	public Boolean geocode(DataSetDescriptor dsd) {
+		// TODO
 		return false;
 	}
 
