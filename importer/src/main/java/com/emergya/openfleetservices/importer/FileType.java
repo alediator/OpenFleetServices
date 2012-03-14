@@ -32,5 +32,5 @@ package com.emergya.openfleetservices.importer;
  * 
  */
 public enum FileType {
-	KML, GML, SHAPEFILE, CVS, XLS
+	KML, GML, SHAPEFILE, CVS, XLS, ZIP
 }

@@ -29,13 +29,27 @@ package com.emergya.openfleetservices.importer.ddbb;
 
 import java.util.Iterator;
 
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Repository;
+
 import com.emergya.openfleetservices.importer.data.DataSetDescriptor;
 
 /**
  * @author marias
  * 
  */
-public interface IJDBCConnector {
+@Repository
+public class JDBCConnector {
+
+	protected NamedParameterJdbcTemplate simpleJdbcTemplate = null;
+
+	@Autowired
+	final public void setDataSource(final DataSource dataSource) {
+	    this.simpleJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+	}
 
 	/**
 	 * Create a Table that suits the {@link DataSetDescriptor} given.
@@ -45,7 +59,10 @@ public interface IJDBCConnector {
 	 * @param dsd
 	 * @return the table name
 	 */
-	public String createTable(DataSetDescriptor dsd);
+	public String createTable(DataSetDescriptor dsd){
+		//TODO
+		return null;
+	}
 
 	/**
 	 * Add one row to the table
@@ -53,7 +70,9 @@ public interface IJDBCConnector {
 	 * @param dsd
 	 * @param it
 	 */
-	public void addData(DataSetDescriptor dsd, Object[] it);
+	public void addData(DataSetDescriptor dsd, Object[] it){
+		//TODO
+	}
 
 	/**
 	 * Add multiple rows to the table (usually calling
@@ -62,8 +81,11 @@ public interface IJDBCConnector {
 	 * @param dsd
 	 * @param it
 	 */
-	public void addAllData(DataSetDescriptor dsd, Iterator<Object[]> it);
-	
+	public void addAllData(DataSetDescriptor dsd, Iterator<Object[]> it){
+		while(it.hasNext()){
+			this.addData(dsd, it.next());
+		}
+	}
 
 	/**
 	 * Given a tablename and the column where the address lies, for each row, it
@@ -72,6 +94,9 @@ public interface IJDBCConnector {
 	 * @param dsd
 	 * @return
 	 */
-	public Boolean geocode(DataSetDescriptor dsd);
+	public Boolean geocode(DataSetDescriptor dsd){
+		//TODO
+		return false;
+	}
 
 }

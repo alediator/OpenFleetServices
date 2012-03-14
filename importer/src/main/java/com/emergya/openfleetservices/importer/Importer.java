@@ -30,7 +30,12 @@ package com.emergya.openfleetservices.importer;
 import java.io.File;
 import java.util.Iterator;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
 import com.emergya.openfleetservices.importer.connector.ShapefileConnector;
+import com.emergya.openfleetservices.importer.data.DataSetDescriptor;
+import com.emergya.openfleetservices.importer.ddbb.JDBCConnector;
 
 /**
  * 
@@ -38,42 +43,58 @@ import com.emergya.openfleetservices.importer.connector.ShapefileConnector;
  * @author marias
  * 
  */
-
+@Repository
 public class Importer {
 
-	public static String doAll(File file, FileType filetype, String columnName,
-			String geoColumnName) {
-		String tablename = doImport(file, filetype, geoColumnName);
-		doGeocoding(tablename, columnName, geoColumnName);
-		return tablename;
+	@Autowired
+	public JDBCConnector jdbcConnector;
+
+	/**
+	 * @param jdbcConnector
+	 *            the jdbcConnector to set
+	 */
+	public void setJdbcConnector(JDBCConnector jdbcConnector) {
+		this.jdbcConnector = jdbcConnector;
 	}
 
-	public static String doImport(File file, FileType filetype,
-			String geoColumnName) {
-		String tablename = null;
+	public DataSetDescriptor doAll(File file, FileType filetype,
+			String columnName, String geoColumnName) {
+		return doGeocoding(doImport(file, filetype, geoColumnName));
+	}
 
-		// TODO
+	/**
+	 * Import the file given
+	 * 
+	 * @param file
+	 * @param filetype
+	 * @param geoColumnName
+	 * @return
+	 */
+	public DataSetDescriptor doImport(File file, FileType filetype,
+			String geoColumnName) {
+
+		IConnector con = null;
+
 		switch (filetype) {
 		case SHAPEFILE:
-			// TODO meterle file
-			ShapefileConnector sc = new ShapefileConnector(null, filetype);
-			Iterator<Object[]> it = sc.getIterator();
-			//TODO
-			
-			
-			tablename = sc.getDescriptor().getTablename();
+			con = new ShapefileConnector(file, filetype);
 			break;
 		default:
 			throw new RuntimeException();
 		}
 
-		return tablename;
+		Iterator<Object[]> it = con.getIterator();
+		this.jdbcConnector.addAllData(con.getDescriptor(), it);
+		return con.getDescriptor();
 	}
 
-	public static void doGeocoding(String tablename, String columnName,
-			String geoColumnName) {
-
-		// TODO
-		//jdbc->geocode
+	/**
+	 * Geocode the table described on the {@link DataSetDescriptor}
+	 * @param dsd
+	 * @return
+	 */
+	public DataSetDescriptor doGeocoding(DataSetDescriptor dsd) {
+		this.jdbcConnector.geocode(dsd);
+		return dsd;
 	}
 }
