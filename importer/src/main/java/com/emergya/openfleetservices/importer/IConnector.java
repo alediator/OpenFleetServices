@@ -48,7 +48,7 @@ public interface IConnector {
 	 * @param f
 	 * @param typefile
 	 */
-	public void initialize(File f, FileType typefile);
+	public void initialize(File f);
 
 	/**
 	 * Given a dataset, it returns the column names

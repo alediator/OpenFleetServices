@@ -77,7 +77,7 @@ public class Importer {
 
 		switch (filetype) {
 		case SHAPEFILE:
-			con = new ShapefileConnector(file, filetype);
+			con = new ShapefileConnector(file);
 			break;
 		default:
 			throw new RuntimeException();

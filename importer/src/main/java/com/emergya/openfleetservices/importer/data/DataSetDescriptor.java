@@ -40,9 +40,11 @@ import java.util.List;
  */
 public class DataSetDescriptor {
 
+	public File file = null;
 	private String tablename = "default";
 	private String columnAddress;
 	private String geoColumnName;
+	private List<Column> fields = new ArrayList<Column>();
 
 	/**
 	 * @return the columnAddress
@@ -72,8 +74,6 @@ public class DataSetDescriptor {
 		this.geoColumnName = geoColumnName;
 	}
 
-	public File file = null;
-
 	public DataSetDescriptor(File file) {
 		this.file = file;
 	}
@@ -93,7 +93,6 @@ public class DataSetDescriptor {
 		this.tablename = tablename;
 	}
 
-	private List<Column> fields = new ArrayList<Column>();
 
 	public void addField(Column c) {
 		fields.add(c);
@@ -103,39 +102,4 @@ public class DataSetDescriptor {
 		return fields;
 	}
 
-}
-
-class Column {
-	private String name;
-	private String type;
-
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * @param name
-	 *            the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	/**
-	 * @return the type
-	 */
-	public String getType() {
-		return type;
-	}
-
-	/**
-	 * @param type
-	 *            the type to set
-	 */
-	public void setType(String type) {
-		this.type = type;
-	}
 }
