@@ -1,8 +1,10 @@
 package com.emergya.openfleetservices.importer.data;
 
+import com.emergya.openfleetservices.importer.ddbb.DataBaseType;
+
 public class Column {
 	private String name;
-	private String type;
+	private DataBaseType type;
 
 	/**
 	 * @return the name
@@ -22,7 +24,7 @@ public class Column {
 	/**
 	 * @return the type
 	 */
-	public String getType() {
+	public DataBaseType getType() {
 		return type;
 	}
 
@@ -30,7 +32,7 @@ public class Column {
 	 * @param type
 	 *            the type to set
 	 */
-	public void setType(String type) {
+	public void setType(DataBaseType type) {
 		this.type = type;
 	}
 }

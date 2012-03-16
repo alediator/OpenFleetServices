@@ -59,6 +59,14 @@ public class DataSetDescriptor {
 	public void setColumnAddress(String columnAddress) {
 		this.columnAddress = columnAddress;
 	}
+	
+	public File getFile(){
+		return file;
+	}
+	
+	public void setFile(File file){
+		this.file = file;
+	}
 
 	/**
 	 * @return the geoColumnName

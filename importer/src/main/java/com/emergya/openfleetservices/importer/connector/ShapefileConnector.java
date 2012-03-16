@@ -102,22 +102,22 @@ public class ShapefileConnector implements IConnector {
 		}
 	}
 	
-	private String getDBTypeFromShape(String classField){
-		String type = "";
+	private DataBaseType getDBTypeFromShape(String classField){
+		DataBaseType type = null;
 		try {
 			if(classField.equals("Long") ||
 					classField.equals("Integer") ||
 					classField.equals("Double")){
 				//TODO Hacer la correspondencia entre tipos numericos
-				type = String.valueOf(DataBaseType.decimal);
+				type = DataBaseType.decimal;
 			}else if(classField.equals("String")){
-				type = String.valueOf(DataBaseType.text);
+				type = DataBaseType.text;
 			}else if(classField.equals("Boolean")){
-				type = String.valueOf(DataBaseType.bool);
+				type =  DataBaseType.bool;
 			}else if(classField.equals("Date")){
-				type = String.valueOf(DataBaseType.date);
+				type = DataBaseType.date;
 			}else if(classField.equals("Timestamp")){
-				type = String.valueOf(DataBaseType.timestamp);
+				type = DataBaseType.timestamp;
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();

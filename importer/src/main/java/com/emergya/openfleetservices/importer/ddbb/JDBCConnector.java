@@ -28,13 +28,18 @@
 package com.emergya.openfleetservices.importer.ddbb;
 
 import java.util.Iterator;
+import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.emergya.openfleetservices.importer.data.Column;
 import com.emergya.openfleetservices.importer.data.DataSetDescriptor;
 
 /**
@@ -43,7 +48,8 @@ import com.emergya.openfleetservices.importer.data.DataSetDescriptor;
  */
 @Repository
 public class JDBCConnector {
-
+	
+	private static final Log LOG = LogFactory.getLog(JDBCConnector.class);
 	protected NamedParameterJdbcTemplate simpleJdbcTemplate = null;
 
 	@Autowired
@@ -60,10 +66,26 @@ public class JDBCConnector {
 	 * @return the table name
 	 */
 	public String createTable(DataSetDescriptor dsd) {
-		// TODO
-		// this.jdbcTemplate.execute("create table mytable
-		// (id integer, name varchar(100))");
-		return null;
+		String tableName = dsd.getTablename();
+		String columnsToTable = "";
+		List<Column> columns = dsd.getFields();
+		Iterator<Column> it = columns.iterator();
+		Column c = (Column)it.next();
+		columnsToTable += c.getName() + " " + c.getType();
+		while(it.hasNext()){
+			c = (Column)it.next();
+			columnsToTable += ", " + c.getName() + " " + c.getType();
+		}
+		String sqlCreateTable = "CREATE TABLE " + tableName + " (" + columnsToTable + ")";
+		
+//		HashMap<String, String> paramMap = new HashMap<String, String>();
+//		PreparedStatementCallback<Object> action = new;
+//		this.simpleJdbcTemplate.execute(sqlCreateTable, paramMap, action );
+		
+		JdbcTemplate jdbc = new JdbcTemplate();
+		jdbc.execute(sqlCreateTable);
+		
+		return tableName;
 	}
 
 	/**
