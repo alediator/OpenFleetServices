@@ -27,15 +27,25 @@
  */
 package com.emergya.openfleetservices.importer.ddbb;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.geotools.math.Line;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCallback;
+import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.SqlRowSetResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -50,11 +60,13 @@ import com.emergya.openfleetservices.importer.data.DataSetDescriptor;
 public class JDBCConnector {
 	
 	private static final Log LOG = LogFactory.getLog(JDBCConnector.class);
-	protected NamedParameterJdbcTemplate simpleJdbcTemplate = null;
+	protected JdbcTemplate simpleJdbcTemplate = null;
+	protected NamedParameterJdbcTemplate namedJdbcTemplate = null;
 
 	@Autowired
 	final public void setDataSource(final DataSource dataSource) {
-		this.simpleJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+		this.simpleJdbcTemplate = new JdbcTemplate(dataSource);
+		this.namedJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 	}
 
 	/**
@@ -68,6 +80,8 @@ public class JDBCConnector {
 	public String createTable(DataSetDescriptor dsd) {
 		String tableName = dsd.getTablename();
 		String columnsToTable = "";
+		String pk = dsd.getNamePK();
+		String sqlCreateTable = "CREATE TABLE ";
 		List<Column> columns = dsd.getFields();
 		Iterator<Column> it = columns.iterator();
 		Column c = (Column)it.next();
@@ -76,14 +90,12 @@ public class JDBCConnector {
 			c = (Column)it.next();
 			columnsToTable += ", " + c.getName() + " " + c.getType();
 		}
-		String sqlCreateTable = "CREATE TABLE " + tableName + " (" + columnsToTable + ")";
-		
-//		HashMap<String, String> paramMap = new HashMap<String, String>();
-//		PreparedStatementCallback<Object> action = new;
-//		this.simpleJdbcTemplate.execute(sqlCreateTable, paramMap, action );
-		
-		JdbcTemplate jdbc = new JdbcTemplate();
-		jdbc.execute(sqlCreateTable);
+		LOG.debug("Creating table: " + tableName);
+		sqlCreateTable = sqlCreateTable + tableName + 
+				" (" + pk + " SERIAL PRIMARY KEY, " +
+				columnsToTable + ")";
+		this.simpleJdbcTemplate.execute(sqlCreateTable);
+		LOG.debug("Table " + tableName + " created");
 		
 		return tableName;
 	}
@@ -95,7 +107,23 @@ public class JDBCConnector {
 	 * @param it
 	 */
 	public void addData(DataSetDescriptor dsd, Object[] it) {
-		// TODO
+		
+		String sqlInsert = "INSERT INTO ";
+		String tableName = dsd.getTablename();
+		List<Column> fields = dsd.getFields();
+		
+		sqlInsert += tableName + "(" + fields.get(0).getName();
+		for(int i=1; i<fields.size(); i++){
+			sqlInsert += ", " + fields.get(i).getName();
+		}
+		sqlInsert += ") VALUES ('" + it[0] + "'";
+		
+		for(int j=1; j<it.length; j++){
+			sqlInsert += ", '" + it[j] + "'";
+		}
+		sqlInsert += ")";
+		
+		this.simpleJdbcTemplate.execute(sqlInsert);
 	}
 
 	/**

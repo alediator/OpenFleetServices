@@ -6,5 +6,5 @@ package com.emergya.openfleetservices.importer.ddbb;
  */
 public enum DataBaseType {
 	//TODO Correspondencia entre Integer, Long y Double
-	decimal, text, bool, date, timestamp
+	decimal, text, bool, date, timestamp, serial
 }

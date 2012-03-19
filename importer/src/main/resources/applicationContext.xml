@@ -24,6 +24,10 @@
 			</list>
 		</property>
 	</bean>
+	
+    <bean id="jdbcConnectorDao" class="com.emergya.openfleetservices.importer.ddbb.JDBCConnector">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
 
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
 		destroy-method="close">

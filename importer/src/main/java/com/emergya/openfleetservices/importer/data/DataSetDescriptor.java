@@ -42,6 +42,7 @@ public class DataSetDescriptor {
 
 	public File file = null;
 	private String tablename = "default";
+	private String namePrimaryKey = "pk";
 	private String columnAddress;
 	private String geoColumnName;
 	private List<Column> fields = new ArrayList<Column>();
@@ -66,6 +67,21 @@ public class DataSetDescriptor {
 	
 	public void setFile(File file){
 		this.file = file;
+	}
+	public String getNamePK(){
+		return this.namePrimaryKey;
+	}
+	
+	public boolean setNamePK(String namePK){
+		boolean res = false;
+		List<Column> fields = this.getFields();
+		for(Column c: fields){
+			if(!c.getName().equals(namePK)){
+				res = true;
+				this.namePrimaryKey = namePK;
+			}
+		}
+		return res;
 	}
 
 	/**
@@ -103,6 +119,23 @@ public class DataSetDescriptor {
 
 
 	public void addField(Column c) {
+		// Check if the column pk is already exist
+		if(c.getName().equals(this.getNamePK())){
+			int i=0;
+			while(!this.setNamePK(this.getNamePK() + String.valueOf(i))){
+				i++;
+			}
+		}
+		// Check if any name is repeated
+		List<Column> fields = this.getFields();
+		for(Column col: fields){
+			int i = 0;
+			while(col.getName().equals(c.getName())){
+				c.setName(col.getName() + String.valueOf(i));
+				addField(c);
+				return;
+			}
+		}
 		fields.add(c);
 	}
 

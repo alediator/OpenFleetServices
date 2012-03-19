@@ -10,13 +10,20 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.jdbc.datasource.init.DataSourceInitializer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 
 import com.emergya.openfleetservices.importer.data.DataSetDescriptor;
 import com.emergya.openfleetservices.importer.ddbb.JDBCConnector;
 
-public class CSVFileConnectorTest {
-
+@ContextConfiguration(locations={"classpath:applicationContext.xml"})
+public class CSVFileConnectorTest extends AbstractJUnit4SpringContextTests{
+	
+	@Autowired
+	private ApplicationContext applicationContext;
+	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 	}
@@ -38,19 +45,15 @@ public class CSVFileConnectorTest {
 		String pathname = "/home/usuario/Escritorio/exportacion/csv/r:rp.csv";
 		File f = new File(pathname);
 		CSVfileConnector csvfile = new CSVfileConnector(f);
+		DataSource ds = (DataSource)applicationContext.getBean("dataSource");
+		DataSetDescriptor dsd = csvfile.getDescriptor();
+		JDBCConnector jdbc = new JDBCConnector();
+		jdbc.setDataSource(ds);
+		jdbc.createTable(dsd);
 		Iterator<Object[]> it = csvfile.getIterator();
 		while(it.hasNext()){
-			String[] obj = (String[])it.next();
-			String cadena = "";
-			for(int i=0;i<obj.length;i++){
-				cadena += " " + obj[i] + " ";
-			}
-			System.out.println(cadena);
+			jdbc.addData(dsd, it.next());
 		}
-		DataSetDescriptor dsd = csvfile.getDescriptor();
-		
-		JDBCConnector jdbc = new JDBCConnector();
-		jdbc .createTable(dsd);
 	}
 
 }
