@@ -27,28 +27,19 @@
  */
 package com.emergya.openfleetservices.importer.ddbb;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.geotools.math.Line;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCallback;
-import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.jdbc.core.SqlRowSetResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.emergya.openfleetservices.importer.connector.NominatimConnector;
 import com.emergya.openfleetservices.importer.data.Column;
 import com.emergya.openfleetservices.importer.data.DataSetDescriptor;
 
@@ -147,7 +138,15 @@ public class JDBCConnector {
 	 * @return
 	 */
 	public Boolean geocode(DataSetDescriptor dsd) {
-		// TODO
+		// TODO Crear una instancia de NominatimConnector
+		// Del dsd vamos a requerir:
+		String columnAddress = dsd.getColumnAddress();
+		String geoColumnName = dsd.getGeoColumnName();
+		// De la instancia de Nominatim extraeremos el geocoding
+		NominatimConnector nm = new NominatimConnector("http://nominatim.openstreetmap.org/search.php?");
+		nm.setFormat("json");
+		nm.setQuery("sevilla");
+		nm.getAddress();
 		return false;
 	}
 

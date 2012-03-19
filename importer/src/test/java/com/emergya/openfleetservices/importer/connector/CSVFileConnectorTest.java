@@ -49,11 +49,12 @@ public class CSVFileConnectorTest extends AbstractJUnit4SpringContextTests{
 		DataSetDescriptor dsd = csvfile.getDescriptor();
 		JDBCConnector jdbc = new JDBCConnector();
 		jdbc.setDataSource(ds);
-		jdbc.createTable(dsd);
-		Iterator<Object[]> it = csvfile.getIterator();
-		while(it.hasNext()){
-			jdbc.addData(dsd, it.next());
-		}
+//		jdbc.createTable(dsd);
+//		Iterator<Object[]> it = csvfile.getIterator();
+//		while(it.hasNext()){
+//			jdbc.addData(dsd, it.next());
+//		}
+		jdbc.geocode(dsd);
 	}
 
 }
