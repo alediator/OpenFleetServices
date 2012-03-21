@@ -54,7 +54,8 @@ public class CSVFileConnectorTest extends AbstractJUnit4SpringContextTests{
 //		while(it.hasNext()){
 //			jdbc.addData(dsd, it.next());
 //		}
-		jdbc.geocode(dsd);
+		String address = "{poblacion},España";
+		jdbc.geocode(dsd, address);
 	}
 
 }

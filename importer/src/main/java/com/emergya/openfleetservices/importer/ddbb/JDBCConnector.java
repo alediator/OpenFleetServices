@@ -27,8 +27,11 @@
  */
 package com.emergya.openfleetservices.importer.ddbb;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -37,6 +40,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
 import com.emergya.openfleetservices.importer.connector.NominatimConnector;
@@ -70,10 +74,26 @@ public class JDBCConnector {
 	 */
 	public String createTable(DataSetDescriptor dsd) {
 		String tableName = dsd.getTablename();
-		String columnsToTable = "";
+		String nameGeomColumn = dsd.getGeoColumnName();
 		String pk = dsd.getNamePK();
-		String sqlCreateTable = "CREATE TABLE ";
 		List<Column> columns = dsd.getFields();
+		int srid = 4326;
+		String columnsToTable = "";
+		String sqlCreateTable = "CREATE TABLE ";
+		Column geoColumn = null;
+		for(Column c: columns){
+			if(c.getName().equals(nameGeomColumn)){
+				geoColumn = new Column();
+				geoColumn.setName(c.getName());
+				geoColumn.setType(c.getType());
+				columns.remove(c);
+			}
+		}
+		if(geoColumn == null){
+			geoColumn = new Column();
+			geoColumn.setName(nameGeomColumn);
+			geoColumn.setType(DataBaseType.GEOMETRY);
+		}
 		Iterator<Column> it = columns.iterator();
 		Column c = (Column)it.next();
 		columnsToTable += c.getName() + " " + c.getType();
@@ -81,12 +101,19 @@ public class JDBCConnector {
 			c = (Column)it.next();
 			columnsToTable += ", " + c.getName() + " " + c.getType();
 		}
-		LOG.debug("Creating table: " + tableName);
 		sqlCreateTable = sqlCreateTable + tableName + 
 				" (" + pk + " SERIAL PRIMARY KEY, " +
 				columnsToTable + ")";
 		this.simpleJdbcTemplate.execute(sqlCreateTable);
-		LOG.debug("Table " + tableName + " created");
+		
+		// Add the geometry field into DB
+		String sqlGeometry = "Select AddGeometryColumn ('" + tableName
+				+ "', '" + geoColumn.getName() 
+				+ "', " + String.valueOf(srid)
+				+ ", '" + geoColumn.getType()
+				+ "', " + String.valueOf(2) + ")";
+		
+		this.simpleJdbcTemplate.execute(sqlGeometry);
 		
 		return tableName;
 	}
@@ -137,17 +164,74 @@ public class JDBCConnector {
 	 * @param dsd
 	 * @return
 	 */
-	public Boolean geocode(DataSetDescriptor dsd) {
-		// TODO Crear una instancia de NominatimConnector
-		// Del dsd vamos a requerir:
-		String columnAddress = dsd.getColumnAddress();
-		String geoColumnName = dsd.getGeoColumnName();
-		// De la instancia de Nominatim extraeremos el geocoding
-		NominatimConnector nm = new NominatimConnector("http://nominatim.openstreetmap.org/search.php?");
+	public int geocode(DataSetDescriptor dsd, String address) {
+		NominatimConnector nm = new NominatimConnector("http://nominatim.openstreetmap.org/search.php");
 		nm.setFormat("json");
-		nm.setQuery("sevilla");
-		nm.getAddress();
-		return false;
+		boolean containColumn = address.contains("{");
+		int rowCont = 0;
+		if(!containColumn){
+			// In order to not contain a column name into the search, the geometry field is the same for all
+			nm.setQuery(address);
+			String geoColumnAddress = nm.getAddress();
+			System.out.println(geoColumnAddress);
+			// Update all fields with geoColumnAddress and geoColumnName
+			this.updateGeometryColumn(dsd, geoColumnAddress);
+		}else{
+			// Get the columns from address
+			List<String> col = new LinkedList<String>();
+			nm.getColumnsToGeom(col, address);
+			SqlRowSet columnsMap = this.getColumnsByList(dsd, col);
+			while(columnsMap.next()){
+				for(String c:col){
+					String dir = address;
+					String param = columnsMap.getString(c);
+					int pk = columnsMap.getInt(dsd.getNamePK());
+					dir = dir.replace("{" + c + "}", param);
+					nm.setQuery(dir);
+					String geoAddress = nm.getAddress();
+					if(geoAddress!=null){
+						String[] splitGeom = geoAddress.split(",");
+						Double lon = Double.valueOf(splitGeom[0]);
+						Double lat = Double.valueOf(splitGeom[1]);
+						String updateSQL = "UPDATE " + dsd.getTablename() +
+								" SET " + dsd.getGeoColumnName() + " = ST_GeomFromEWKT(:geom)" +
+								" WHERE " + dsd.getNamePK() + "=:pk";
+						Map<String, Object> paramMap = new HashMap<String, Object>();
+						paramMap.put("pk", pk);
+						paramMap.put("geom", "SRID=4326;POINT("+lon+" "+lat+")");
+						this.namedJdbcTemplate.update(updateSQL, paramMap);
+					}else{
+						rowCont++;
+					}
+				}
+			}
+		}
+		return rowCont;
+	}
+	
+	public SqlRowSet getColumnsByList(DataSetDescriptor dsd, List<String> col){
+		String sql = "SELECT pk, ";
+		for(String s: col){
+			if(!s.equals(col.get(col.size()-1))){
+				sql += s + ",";
+			}else{
+				sql += s;
+			}
+		}
+		sql += " FROM " + dsd.getTablename();
+		return this.simpleJdbcTemplate.queryForRowSet(sql);
 	}
 
+	public void updateGeometryColumn(DataSetDescriptor dsd, String geoColumnAddress){
+		String geoColumnName = dsd.getGeoColumnName();
+		String tableName = dsd.getTablename();
+		String splitGeom[] = geoColumnAddress.split(",");
+		Double lon = Double.valueOf(splitGeom[0]);
+		Double lat = Double.valueOf(splitGeom[1]);
+		String updateSQL = "UPDATE " + tableName +
+				" SET " + geoColumnName + " = ST_GeomFromEWKT(\'SRID=4326;POINT(" + lon + " " + lat + ")\')";
+		
+		Map<String, Object> namedParameters = new HashMap<String, Object>();
+		this.namedJdbcTemplate.update(updateSQL, namedParameters);
+	}
 }

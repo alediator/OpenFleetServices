@@ -42,6 +42,12 @@
 			<artifactId>httpclient</artifactId>
 			<version>4.2-beta1</version>
 		</dependency>
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>3.1</version>
+		</dependency>
+
 
 
 		<!-- CSV File Reader -->
@@ -74,6 +80,13 @@
 			<groupId>org.postgis</groupId>
 			<artifactId>postgis-jdbc</artifactId>
 			<version>1.3.3</version>
+		</dependency>
+		<!-- JSON Parser -->
+		<dependency>
+			<groupId>net.sf.json-lib</groupId>
+			<artifactId>json-lib</artifactId>
+			<version>2.4</version>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 

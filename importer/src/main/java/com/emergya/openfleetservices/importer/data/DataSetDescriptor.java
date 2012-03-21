@@ -43,23 +43,8 @@ public class DataSetDescriptor {
 	public File file = null;
 	private String tablename = "default";
 	private String namePrimaryKey = "pk";
-	private String columnAddress;
-	private String geoColumnName;
+	private String geoColumnName = "the_geom";
 	private List<Column> fields = new ArrayList<Column>();
-
-	/**
-	 * @return the columnAddress
-	 */
-	public String getColumnAddress() {
-		return columnAddress;
-	}
-
-	/**
-	 * @param columnAddress the columnAddress to set
-	 */
-	public void setColumnAddress(String columnAddress) {
-		this.columnAddress = columnAddress;
-	}
 	
 	public File getFile(){
 		return file;
@@ -94,8 +79,22 @@ public class DataSetDescriptor {
 	/**
 	 * @param geoColumnName the geoColumnName to set
 	 */
-	public void setGeoColumnName(String geoColumnName) {
-		this.geoColumnName = geoColumnName;
+	public boolean setGeoColumnName(String geoColumnName) {
+		boolean res = false;
+		List<Column> fields = this.getFields();
+		for(Column c: fields){
+			if(!c.getName().equals(geoColumnName)){
+				res = true;
+				this.geoColumnName = geoColumnName;
+			}else{
+				int i = 0;
+				while(c.getName().equals(geoColumnName)){
+					res = this.setGeoColumnName(c.getName() + String.valueOf(i));
+					i++;
+				}
+			}
+		}
+		return res;
 	}
 
 	public DataSetDescriptor(File file) {
@@ -133,6 +132,7 @@ public class DataSetDescriptor {
 			while(col.getName().equals(c.getName())){
 				c.setName(col.getName() + String.valueOf(i));
 				addField(c);
+				i++;
 				return;
 			}
 		}

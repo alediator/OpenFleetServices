@@ -58,8 +58,8 @@ public class Importer {
 	}
 
 	public DataSetDescriptor doAll(File file, FileType filetype,
-			String columnName, String geoColumnName) {
-		return doGeocoding(doImport(file, filetype, geoColumnName));
+			String columnName, String geoColumnName, String address) {
+		return doGeocoding(doImport(file, filetype, geoColumnName), address);
 	}
 
 	/**
@@ -93,8 +93,8 @@ public class Importer {
 	 * @param dsd
 	 * @return
 	 */
-	public DataSetDescriptor doGeocoding(DataSetDescriptor dsd) {
-		this.jdbcConnector.geocode(dsd);
+	public DataSetDescriptor doGeocoding(DataSetDescriptor dsd, String address) {
+		this.jdbcConnector.geocode(dsd, address);
 		return dsd;
 	}
 }
