@@ -9,14 +9,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class ShapeFileConnectorTest {
-
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
+	
+	public static final String TEST_ONE = "target/test-classes/files/shapefiles/points_23030.shp";
 
 	@Before
 	public void setUp() throws Exception {
@@ -28,7 +22,7 @@ public class ShapeFileConnectorTest {
 
 	@Test
 	public void test() {
-		String pathname = "/home/usuario/teleatlas_split/network_split.shp";
+		String pathname = TEST_ONE;
 		File f = new File(pathname);
 		ShapefileConnector sfc = new ShapefileConnector(f);
 	}

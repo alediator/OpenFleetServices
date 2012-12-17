@@ -14,12 +14,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.springframework.test.context.transaction.TransactionConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.emergya.openfleetservices.importer.data.DataSetDescriptor;
 import com.emergya.openfleetservices.importer.ddbb.JDBCConnector;
 
 @ContextConfiguration(locations={"classpath:applicationContext.xml"})
+@TransactionConfiguration(defaultRollback = true, transactionManager = "transactionManager")
+@Transactional
 public class CSVFileConnectorTest extends AbstractJUnit4SpringContextTests{
+	
+	public static final String TEST_ONE = "target/test-classes/files/csv/r:rp.csv";
 	
 	@Autowired
 	private ApplicationContext applicationContext;
@@ -42,18 +48,18 @@ public class CSVFileConnectorTest extends AbstractJUnit4SpringContextTests{
 
 	@Test
 	public void test() {
-		String pathname = "/home/usuario/Escritorio/exportacion/csv/r:rp.csv";
+		String pathname = TEST_ONE;
 		File f = new File(pathname);
 		CSVfileConnector csvfile = new CSVfileConnector(f);
 		DataSource ds = (DataSource)applicationContext.getBean("dataSource");
 		DataSetDescriptor dsd = csvfile.getDescriptor();
 		JDBCConnector jdbc = new JDBCConnector();
 		jdbc.setDataSource(ds);
-//		jdbc.createTable(dsd);
-//		Iterator<Object[]> it = csvfile.getIterator();
-//		while(it.hasNext()){
-//			jdbc.addData(dsd, it.next());
-//		}
+		jdbc.createTable(dsd);
+		Iterator<Object[]> it = csvfile.getIterator();
+		while(it.hasNext()){
+			jdbc.addData(dsd, it.next());
+		}
 		String address = "{poblacion},España";
 		jdbc.geocode(dsd, address);
 	}
